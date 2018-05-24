@@ -77,6 +77,43 @@
           </div>
         </fieldset>
       </form>
+      <form class="action-buttons" action="/people/rescue" method="POST">
+        <fieldset>
+          <legend>Mordida da salvação em um zumbi</legend>
+          <span class="help-block">Quando uma pessoa morde um zumbi, ele se torna uma pessoa. </span>
+          <div class="container-fluid form-rows">
+            <div class="row">
+              <div class="col-xs-3">
+                <label for="pessoa" class="control-label">Quem vai dar a mordida da salvação? (pessoa)</label>
+              </div>
+              <div class="col-xs-6">
+                <select class="form-control" name="person" id="person">
+                  {{#each people}}
+                  {{#if alive}}
+                  <option value="{{id}}">{{name}}</option>
+                  {{/if}}
+                  {{/each}}
+                </select>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-xs-3">
+                <label for="zumbi" class="control-label">Quem? (zumbi)</label>
+              </div>
+              <div class="col-xs-6">
+                <select class="form-control" name="zombie" id="zombie">
+                  {{#each zombies}}
+                  <option value="{{id}}">{{name}}</option>
+                  {{/each}}
+                </select>
+              </div>
+              <div class="col-xs-3">
+                <button type="submit" class="btn btn-default">Mordida da salvação</button>
+              </div>
+            </div>
+          </div>
+        </fieldset>
+      </form>
     </div>
 
     <!-- Estatisticas -->

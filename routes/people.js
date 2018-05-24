@@ -73,13 +73,13 @@ router.post('/', (req, res) => {
     req.flash('error', 'Uma pessoa precisa ter um nome, por mais estranho que ele seja...');
     res.redirect('/people');
   }else{
-    db.query('INSERT INTO person(name, alive, eatenBy) VALUES (\'' +
+    db.query('INSERT INTO zombies.person(name, alive, eatenBy) VALUES (\'' +
       req.body.name + '\',1,null);',
       (err, result) => {
         if (err) {
           req.flash('error', 'Erro desconhecido. Pessoa não inserida: ' + err);
         } else {
-          req.flash('success', 'A pessoa foi entrou no cemitério.');
+          req.flash('success', 'A pessoa entrou no cemitério.');
         }
         res.redirect('/people');
     });
@@ -95,7 +95,7 @@ router.post('/', (req, res) => {
 //      - Em caso de erro do INSERT, colocar mensagem vermelhinha
 
 router.delete('/:id', (req, res) => {
-  db.query('DELETE from person where id=\'' +
+  db.query('DELETE from zombies.person where id=\'' +
     req.params.id + '\';',
     (err, result) => {
       if (err) {
@@ -107,6 +107,54 @@ router.delete('/:id', (req, res) => {
       }
       res.redirect('/people');
   });
+});
+
+/* POST transforma um zumbi novamente em uma pessoa */
+router.post('/rescue', (req, res) => {
+  // busca nome do zumbi mordiscado
+  // recriar a pessoa a partir do seu nome antigo
+  // e excluir o zumbi
+  console.log("ID: " + db.escape(req.body.zombie).toString());
+  if(req.body.zombie == '1'){
+    req.flash('error', 'Humano tolo! Eu sou o Mestre Zumbie! Jamais me tornarei um humano.');
+    res.redirect('/');
+  }
+  else{
+    db.query('SELECT previousName FROM zombies.zombie WHERE id = ' + db.escape(req.body.zombie),
+      (err, result) => {
+        if (err) {
+          res.status(500).send('Erro ao realizar a mordida da salvação. Acho que esse não tenha volta.');
+          return;
+        }
+        if (typeof result[0] === 'undefined') {
+          req.flash('error', 'Zumbie nao encontrado!');
+          res.redirect('/');
+          return;
+        }
+        const name = result[0].previousName;
+        db.query('INSERT INTO zombies.person(name, alive, eatenBy) VALUES (\'' +
+        name + '\',1,null);',
+          (err, result) => {
+            if (err) {
+              res.status(500).send('Erro ao realizar a mordida da salvação. Acho que esse não tenha volta.');
+              return;
+            }
+            db.query('DELETE FROM zombies.zombie WHERE id = ' + req.body.zombie,
+              (err, result) => {
+                if (err) {
+                  res.status(500).send('Erro ao realizar a mordida da salvação. Acho que esse não tenha volta.');
+                  return;
+                }
+
+                req.flash('peopleCountChange', '+1');
+                req.flash('zombieCountChange', '-1');
+                req.flash('success', 'Mordida da salvação! Zumbi recuperado e se tornou novamente: ' + name);
+                res.redirect('/');
+              });
+          });
+
+      });
+  }
 });
 
 module.exports = router;

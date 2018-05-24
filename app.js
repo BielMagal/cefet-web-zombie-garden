@@ -60,25 +60,16 @@ app.use((req, res, next) => {
     next(err);
 });
 
-// handler de erros em ambientes de dev
-// imprime a stacktrace
-if (app.get('env') === 'development') {
-    app.use((err, req, res, next) => {
-        res.status(err.status || 500);
-        res.render('error', {
-            message: err.message,
-            error: err
-        });
-    });
-}
-
-// handler de erros de ambiente de produção
-// não mostra a stack de erros pro usuário
+// handler de erros
+// apenas imprime a stacktrace em ambientes de dev
 app.use((err, req, res, next) => {
+  let error = {};
+  if (app.get('env') === 'development')
+    error = err;
     res.status(err.status || 500);
     res.render('error', {
         message: err.message,
-        error: {}
+        error
     });
 });
 
